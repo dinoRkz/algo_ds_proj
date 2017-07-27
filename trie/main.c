@@ -9,83 +9,95 @@ struct node
     bool isEOW;
     struct node* next[ALPHABET_SIZE];
 };
-
 typedef struct node Node;
 
+// This method creates a new node of type 'Node'
 Node* createNode()
 {
     int i=0;
+
     // return type of malloc is void* so convert it to node*
     // address is returned right side so node* n on left
+    // allocate this memory to a new node
+    Node* newNode = (Node*)malloc(sizeof(Node));
 
-    Node* newNode = (Node*)malloc(sizeof(Node));// Allocate a new node
-    newNode->isEOW = false;// initialise its members
+    // initialise its members
+    newNode->isEOW = false;
     for( i=0 ; i < ALPHABET_SIZE ; i++)
         newNode->next[i] = NULL;
-    return newNode;// return node
+
+    // return node
+    return newNode;
 
 }
 
-int showMenu()
-{
-    int ch;
-    printf("MENU\n");
-    printf("====\n");
-    printf("1. Insert word\n");
-    printf("2. Auto Suggest\n");
-    printf("3. Print all words\n");
-    printf("4. Exit\n");
-    printf("Your Choice: ");
-    scanf("%d", &ch);
-    return ch;
-}
-
+// This method inserts a node into trie
 void insertWord(Node* root, char word[])
 {
     int i;
+    // create a copy of root
     Node* temp = root;
+
     // repeat for each char in word
-    for(i=0 ; i<strlen(word) ; i++){
+    for(i=0 ; i<strlen(word) ; i++)
+    {
+        // ASCII value of current character
         int idx = word[i] - 'a';
+
+        // if the current character (character to be added to the part of word traversed)
+        // is not present, create a new node and assign it to 'ASCII value of character' of next pointer
         if(temp->next[idx] == NULL)
             temp->next[idx] = createNode();
-        temp = temp->next[idx];  // going down
+        
+        // if the current character is already present, go to next node
+        temp = temp->next[idx];
     }
 
+    // After the word is complete, set isEOW as true
     temp->isEOW = true;
     printf("inserted %s\n", word);
 }
 
+// This is a recursive(DFS type recursion) function to print all words
 void printAllWords(Node *root, char *prefix)
 {
-    int len = strlen(prefix);
+    int i, len = strlen(prefix);
+
+    // len + 2 = length of prefix accessed + current character + '\0'
     char newPrefix[len+2];
     strcpy(newPrefix, prefix);
-    int i;
 
-
+    // if no words are present in trie, return
     if(root == NULL)
         return;
 
+    // if recursion reaches EOW, print
     if(root->isEOW)
         printf("%s\n",newPrefix);
 
+    // DFS type recursion
     for(i=0 ; i<ALPHABET_SIZE ; i++)
     {
         if(root->next[i] != NULL)
         {
+            // typecast and append current character
             newPrefix[len] = (char)('a'+i);
+            
+            // append null terminator
             newPrefix[len+1] = '\0';
+            
+            // recurse
             printAllWords(root->next[i], newPrefix);
         }
     }
-
-
 }
 
+// prints all words starting with the given prefix
 void autoSuggest(Node *root, char *prefix)
 {
     int i;
+
+    // going down the trie until the prefix is traversed completely
     for(i=0 ; prefix[i]!='\0' ; i++)
     {
         int idx = prefix[i] - 'a';
@@ -97,9 +109,33 @@ void autoSuggest(Node *root, char *prefix)
             return;
         }
     }
+
+    // print all words from here
     printAllWords(root, prefix);
 }
 
+// This method, shows menu and returns integer
+int showMenu()
+{
+    int ch;
+    char junkChars[256];
+    printf("MENU\n");
+    printf("====\n");
+    printf("1. Insert word\n");
+    printf("2. Auto Suggest\n");
+    printf("3. Print all words\n");
+    printf("4. Exit\n");
+    printf("Your Choice: ");
+
+    // Input validation - goo.gl/XnjH6A
+    if(scanf("%d", &ch) == 0)
+    {
+        printf("Please type an integer...\n");
+        scanf("%s", junkChars);
+        return -1;
+    }
+    return ch;
+}
 
 int main()
 {
@@ -137,8 +173,8 @@ int main()
             break;
         case 4:
             exit(0);
-            // return can be done
-            // exit here so break is not necessarily required
+            // return(instead of exit(0)) can be done
+            // exit(0) is here, so break is not necessarily required
         default:
             printf("Bad choice!! Try Again...\n");
         }
