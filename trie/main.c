@@ -145,14 +145,19 @@ int main()
 
     FILE *fp = fopen("dictionary.txt", "r");
     if(fp == NULL)
-        printf("file not found!");
-    while(!feof(fp))
     {
-        fscanf(fp, "%s", word);
-        insertWord(root, word);
+        printf("file not found!");
+        exit(0);
+    }
+    else
+    {
+        while(!feof(fp))
+        {
+            fscanf(fp, "%s", word);
+            insertWord(root, word);
+        }
     }
     fclose(fp);
-
     while(1)
     {
         ch = showMenu();
